@@ -580,9 +580,8 @@ async def payment_amount_entered(update: Update, context: ContextTypes.DEFAULT_T
     db["payments"].append(payment_entry)
     db["balances"][user_name] -= amount
 
-    # 🔥 УДАЛЯЕМ ВСЕ ВИДЕО И ЗАГРУЗКИ ЭТОЙ ДЕВУШКИ ПОСЛЕ ВЫПЛАТЫ
+    # 🔥 УДАЛЯЕМ ВСЕ ВИДЕО ЭТОЙ ДЕВУШКИ ПОСЛЕ ВЫПЛАТЫ
     db["videos"] = [v for v in db["videos"] if v["user"] != user_name]
-    db["uploads"] = [u for u in db["uploads"] if u["user"] != user_name]
 
     save_database(db)
 
@@ -600,7 +599,7 @@ async def payment_amount_entered(update: Update, context: ContextTypes.DEFAULT_T
         f"👤 {user_name}\n"
         f"💰 Сумма: {amount} грн\n"
         f"📊 Новый баланс: {db['balances'][user_name]} грн\n"
-        f"📹 Все сделанные видео и загрузки удалены!"
+        f"📹 Все сделанные видео удалены!"
     )
 
     context.user_data.clear()
@@ -734,21 +733,12 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 def main():
-    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-    
-    # Если переменная не найдена, пробуем альтернативные способы
-    if not TOKEN:
-        # Пробуем получить из переменных окружения другим способом
-        import sys
-        TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
-    
+    # 🔥 ДОБАВЛЕН FALLBACK НА ТОКЕН - ЕСЛИ ПЕРЕМЕННАЯ ОКРУЖЕНИЯ НЕ НАЙДЕНА, ИСПОЛЬЗУЕМ ТОКЕН НАПРЯМУЮ
+    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN") or "8280555186:AAFxZ9AfNOJdQWfFjFGk37g3pBnXCPvnupk"
+
     if not TOKEN:
         print("❌ Ошибка: Не найден TELEGRAM_BOT_TOKEN")
         print("Установите токен: export TELEGRAM_BOT_TOKEN='your_token_here'")
-        print("Доступные переменные окружения:")
-        for key in os.environ:
-            if 'TOKEN' in key or 'TELEGRAM' in key:
-                print(f"  {key}")
         return
 
     application = Application.builder().token(TOKEN).build()
