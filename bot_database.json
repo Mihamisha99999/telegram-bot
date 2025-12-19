@@ -1,0 +1,84 @@
+{
+  "users": {
+    "Вика": {
+      "role": "creator",
+      "rates": {
+        "a2e": 350,
+        "makefilm": 400
+      },
+      "can_upload": false,
+      "telegram_id": 744838350
+    },
+    "Юля": {
+      "role": "creator_uploader",
+      "rates": {
+        "a2e": 300,
+        "makefilm": 500,
+        "upload": 200
+      },
+      "can_upload": true,
+      "telegram_id": 5246494270
+    },
+    "Алла": {
+      "role": "creator_uploader",
+      "rates": {
+        "a2e": 300,
+        "upload": 150
+      },
+      "can_upload": true,
+      "telegram_id": null
+    },
+    "Аня": {
+      "role": "creator",
+      "rates": {
+        "a2e": 300
+      },
+      "can_upload": false,
+      "telegram_id": null
+    }
+  },
+  "admins": {
+    "admin": 2147091471,
+    "husband": 2106439695
+  },
+  "videos": [],
+  "uploads": [
+    {
+      "date": "2025-12-19T19:56:38.668933",
+      "user": "Юля",
+      "count": 13,
+      "amount": 2600,
+      "status": "uploaded"
+    },
+    {
+      "date": "2025-12-19T19:59:52.909838",
+      "user": "Юля",
+      "count": 5,
+      "amount": 1000,
+      "status": "uploaded"
+    }
+  ],
+  "payments": [
+    {
+      "date": "2025-12-19T19:57:30.815469",
+      "user": "Вика",
+      "amount": 1850
+    },
+    {
+      "date": "2025-12-19T19:57:41.249549",
+      "user": "Юля",
+      "amount": 3400
+    },
+    {
+      "date": "2025-12-19T20:00:38.211258",
+      "user": "Юля",
+      "amount": 2000
+    }
+  ],
+  "balances": {
+    "Вика": 0,
+    "Юля": 0,
+    "Алла": 0,
+    "Аня": 0
+  }
+}
