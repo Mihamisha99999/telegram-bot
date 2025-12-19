@@ -735,10 +735,20 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main():
     TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-
+    
+    # Если переменная не найдена, пробуем альтернативные способы
+    if not TOKEN:
+        # Пробуем получить из переменных окружения другим способом
+        import sys
+        TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+    
     if not TOKEN:
         print("❌ Ошибка: Не найден TELEGRAM_BOT_TOKEN")
         print("Установите токен: export TELEGRAM_BOT_TOKEN='your_token_here'")
+        print("Доступные переменные окружения:")
+        for key in os.environ:
+            if 'TOKEN' in key or 'TELEGRAM' in key:
+                print(f"  {key}")
         return
 
     application = Application.builder().token(TOKEN).build()
