@@ -2,4 +2,4 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "python telegram_bot.py"
+startCommand = ". /opt/venv/bin/activate && python telegram_bot.py"
