@@ -934,7 +934,8 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 def main():
-    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+    TOKEN = os.getenv("TELEGRAM_BOT_TOKEN") or "8280555186:AAFxZ9AfNOJdQWfFjFGk37g3pBnXCPvnupk"
+
 
     if not TOKEN:
         print("❌ Ошибка: Не найден TELEGRAM_BOT_TOKEN")
