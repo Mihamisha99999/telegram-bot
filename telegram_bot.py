@@ -121,17 +121,7 @@ def load_database() -> Dict:
         "payments": [],
         "plans": {},
         "days_off_requests": [],
-        "days_off_approved": {
-            "Вика": [{"date": "2026-01-30", "reason": "выходной", "approved_at": "2026-01-28"}],
-            "Юля": [
-                {"date": "2026-02-02", "reason": "выходной", "approved_at": "2026-01-28"},
-                {"date": "2026-02-03", "reason": "выходной", "approved_at": "2026-01-28"}
-            ],
-            "Алла": [],
-            "Аня": [{"date": "2026-02-05", "reason": "выходной", "approved_at": "2026-01-28"}],
-            "☀️": [],
-            "🌸": []
-        },
+        "days_off_approved": {},
         "admin_days_off": {
             "admin": [],
             "husband": []
@@ -218,11 +208,11 @@ def get_main_keyboard(user_id: int) -> ReplyKeyboardMarkup:
             ['🎬 Все видео', '📊 Экспорт в Excel'],
             ['🏆 Рейтинг девушек', '📅 План на неделю'],
             ['📅 График выходных', '📅 Мои выходные'],
-            ['🔔 Запросы выходных']
+            ['🔔 Запросы выходных', '📢 Срочное сообщение']
         ]
     else:
         keyboard = [
-            ['🎬 Создала видео'],
+            ['🎬 Создала видео', '📤 Загрузила видео'],
             ['💰 Мой доход', '📊 Моя статистика'],
             ['📅 Мой план', '📅 Мой календарь'],
             ['📅 Запросить выходной']
@@ -388,7 +378,7 @@ async def video_name_entered(update: Update, context: ContextTypes.DEFAULT_TYPE)
         reply_markup=get_main_keyboard(update.effective_user.id)
     )
     
-    # Уведомление админу о создании видео
+    # Уведомление админу
     for admin_id in ADMINS + [HUSBAND_ID]:
         try:
             await context.bot.send_message(
@@ -1282,8 +1272,7 @@ async def dayoff_approve_reject(update: Update, context: ContextTypes.DEFAULT_TY
     await query.answer()
     
     action = "approve" if "approve" in query.data else "reject"
-    # Извлекаем request_id правильно: dayoff_approve_req_001 -> req_001
-    request_id = "_".join(query.data.split("_")[2:])  # Все после dayoff_approve_
+    request_id = "_".join(query.data.split("_")[2:])
     
     # Находим запрос
     request = next((r for r in db['days_off_requests'] if r['id'] == request_id), None)
@@ -1763,10 +1752,10 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 # ===========================
-# СРОЧНОЕ СООБЩЕНИЕ ВСЕМ (АДМИН)
+# СРОЧНОЕ СООБЩЕНИЕ ВСЕМ
 # ===========================
 async def broadcast_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Начало отправки срочного сообщения всем"""
+    """Начало отправки срочного сообщения"""
     user_id = update.effective_user.id
     
     if not is_admin(user_id):
@@ -1775,19 +1764,18 @@ async def broadcast_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await update.message.reply_text(
         "📢 СРОЧНОЕ СООБЩЕНИЕ ВСЕМ\n\n"
-        "Напиши текст сообщения, которое будет отправлено всем девушкам:"
+        "Напиши текст сообщения для всех девушек:"
     )
     
     return BROADCAST_MESSAGE
 
 async def broadcast_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Отправка срочного сообщения всем"""
+    """Отправка сообщения всем"""
     message_text = update.message.text
     
     sent_count = 0
     failed_count = 0
     
-    # Отправляем всем зарегистрированным пользователям
     for user_name, user_data in db['users'].items():
         telegram_id = user_data.get('telegram_id')
         if telegram_id:
@@ -1798,7 +1786,7 @@ async def broadcast_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
                 sent_count += 1
             except Exception as e:
-                logger.error(f"Не удалось отправить сообщение {user_name}: {e}")
+                logger.error(f"Не удалось отправить {user_name}: {e}")
                 failed_count += 1
     
     await update.message.reply_text(
