@@ -387,6 +387,21 @@ async def video_name_entered(update: Update, context: ContextTypes.DEFAULT_TYPE)
         reply_markup=get_main_keyboard(update.effective_user.id)
     )
     
+    # Уведомление админу о создании видео
+    for admin_id in ADMINS + [HUSBAND_ID]:
+        try:
+            await context.bot.send_message(
+                chat_id=admin_id,
+                text=f"🎬 НОВОЕ ВИДЕО!\n\n"
+                     f"👤 {user_name}\n"
+                     f"📹 {video_name}\n"
+                     f"🎬 Тип: {video_type.upper()}\n"
+                     f"💰 Сумма: {price} грн\n"
+                     f"💵 Баланс: {new_balance} грн"
+            )
+        except Exception as e:
+            logger.error(f"Не удалось отправить уведомление админу {admin_id}: {e}")
+    
     # Очистка контекста
     context.user_data.clear()
     return ConversationHandler.END
@@ -457,6 +472,20 @@ async def upload_count_entered(update: Update, context: ContextTypes.DEFAULT_TYP
         f"💵 Текущий баланс: {new_balance} грн",
         reply_markup=get_main_keyboard(update.effective_user.id)
     )
+    
+    # Уведомление админу о загрузке видео
+    for admin_id in ADMINS + [HUSBAND_ID]:
+        try:
+            await context.bot.send_message(
+                chat_id=admin_id,
+                text=f"📤 ЗАГРУЗКА ВИДЕО!\n\n"
+                     f"👤 {user_name}\n"
+                     f"📤 Количество: {count}\n"
+                     f"💰 Сумма: {total_amount} грн\n"
+                     f"💵 Баланс: {new_balance} грн"
+            )
+        except Exception as e:
+            logger.error(f"Не удалось отправить уведомление админу {admin_id}: {e}")
     
     context.user_data.clear()
     return ConversationHandler.END
@@ -1266,7 +1295,8 @@ async def dayoff_approve_reject(update: Update, context: ContextTypes.DEFAULT_TY
     await query.answer()
     
     action = "approve" if "approve" in query.data else "reject"
-    request_id = query.data.split("_")[-1]
+    # Извлекаем request_id правильно: dayoff_approve_req_001 -> req_001
+    request_id = "_".join(query.data.split("_")[2:])  # Все после dayoff_approve_
     
     # Находим запрос
     request = next((r for r in db['days_off_requests'] if r['id'] == request_id), None)
@@ -1746,6 +1776,56 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 # ===========================
+# СРОЧНОЕ СООБЩЕНИЕ ВСЕМ (АДМИН)
+# ===========================
+async def broadcast_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Начало отправки срочного сообщения всем"""
+    user_id = update.effective_user.id
+    
+    if not is_admin(user_id):
+        await update.message.reply_text("❌ Доступно только администратору")
+        return ConversationHandler.END
+    
+    await update.message.reply_text(
+        "📢 СРОЧНОЕ СООБЩЕНИЕ ВСЕМ\n\n"
+        "Напиши текст сообщения, которое будет отправлено всем девушкам:"
+    )
+    
+    return BROADCAST_MESSAGE
+
+async def broadcast_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Отправка срочного сообщения всем"""
+    message_text = update.message.text
+    
+    sent_count = 0
+    failed_count = 0
+    
+    # Отправляем всем зарегистрированным пользователям
+    for user_name, user_data in db['users'].items():
+        telegram_id = user_data.get('telegram_id')
+        if telegram_id:
+            try:
+                await context.bot.send_message(
+                    chat_id=telegram_id,
+                    text=f"📢 СРОЧНОЕ СООБЩЕНИЕ ОТ АДМИНИСТРАТОРА\n\n{message_text}"
+                )
+                sent_count += 1
+            except Exception as e:
+                logger.error(f"Не удалось отправить сообщение {user_name}: {e}")
+                failed_count += 1
+    
+    await update.message.reply_text(
+        f"✅ Сообщение отправлено!\n\n"
+        f"📤 Успешно: {sent_count}\n"
+        f"❌ Ошибок: {failed_count}",
+        reply_markup=get_main_keyboard(update.effective_user.id)
+    )
+    
+    context.user_data.clear()
+    return ConversationHandler.END
+
+
+# ===========================
 # ОБРАБОТКА ТЕКСТОВЫХ СООБЩЕНИЙ
 # ===========================
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -1767,6 +1847,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await my_plan(update, context)
     elif text == '📅 Мой календарь':
         await my_calendar(update, context)
+    # ConversationHandler кнопки (обрабатываются ConversationHandler, если неактивен - игнорируем)
+    elif text in ['🎬 Создала видео', '📤 Загрузила видео', '🗑️ Удалить видео', 
+                   '📅 План на неделю', '💰 Выплатить аванс', '📅 Запросить выходной',
+                   '📅 Мои выходные', '📢 Срочное сообщение']:
+        # Эти кнопки должны обрабатываться ConversationHandler
+        # Если мы здесь - значит ConversationHandler не сработал (не должно быть)
+        pass
     elif text == '📊 Полная статистика':
         await full_statistics(update, context)
     elif text == '⚙️ Текущий баланс':
@@ -1902,6 +1989,18 @@ def main():
     application.add_handler(advance_conv_handler)
     application.add_handler(dayoff_conv_handler)
     application.add_handler(admin_dayoff_conv_handler)
+    
+    # ConversationHandler для срочного сообщения
+    broadcast_conv_handler = ConversationHandler(
+        entry_points=[MessageHandler(filters.Regex('^📢 Срочное сообщение$'), broadcast_start)],
+        states={
+            BROADCAST_MESSAGE: [MessageHandler(filters.TEXT & ~filters.COMMAND, broadcast_send)]
+        },
+        fallbacks=[CommandHandler('cancel', cancel)],
+        name="broadcast",
+        persistent=False
+    )
+    application.add_handler(broadcast_conv_handler)
     
     # CallbackQueryHandlers
     application.add_handler(CallbackQueryHandler(process_salary_payment, pattern='^pay_salary_'))
