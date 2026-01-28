@@ -49,6 +49,7 @@ DB_FILE = 'bot_database.json'
 # Состояния ConversationHandler
 VIDEO_TYPE, VIDEO_NAME = range(2)
 UPLOAD_COUNT = 100
+BROADCAST_MESSAGE = 700
 DELETE_VIDEO_SELECT, DELETE_VIDEO_CONFIRM = 200, 201
 PLAN_USER, PLAN_DETAILS = 300, 301
 ADVANCE_USER, ADVANCE_AMOUNT, ADVANCE_CONFIRM = 400, 401, 402
@@ -2015,3 +2016,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
