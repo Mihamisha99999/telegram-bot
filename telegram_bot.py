@@ -222,7 +222,7 @@ def get_main_keyboard(user_id: int) -> ReplyKeyboardMarkup:
         ]
     else:
         keyboard = [
-            ['🎬 Создала видео', '📤 Загрузила видео'],
+            ['🎬 Создала видео'],
             ['💰 Мой доход', '📊 Моя статистика'],
             ['📅 Мой план', '📅 Мой календарь'],
             ['📅 Запросить выходной']
@@ -473,20 +473,6 @@ async def upload_count_entered(update: Update, context: ContextTypes.DEFAULT_TYP
         f"💵 Текущий баланс: {new_balance} грн",
         reply_markup=get_main_keyboard(update.effective_user.id)
     )
-    
-    # Уведомление админу о загрузке видео
-    for admin_id in ADMINS + [HUSBAND_ID]:
-        try:
-            await context.bot.send_message(
-                chat_id=admin_id,
-                text=f"📤 ЗАГРУЗКА ВИДЕО!\n\n"
-                     f"👤 {user_name}\n"
-                     f"📤 Количество: {count}\n"
-                     f"💰 Сумма: {total_amount} грн\n"
-                     f"💵 Баланс: {new_balance} грн"
-            )
-        except Exception as e:
-            logger.error(f"Не удалось отправить уведомление админу {admin_id}: {e}")
     
     context.user_data.clear()
     return ConversationHandler.END
@@ -1825,7 +1811,6 @@ async def broadcast_send(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data.clear()
     return ConversationHandler.END
 
-
 # ===========================
 # ОБРАБОТКА ТЕКСТОВЫХ СООБЩЕНИЙ
 # ===========================
@@ -1848,13 +1833,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await my_plan(update, context)
     elif text == '📅 Мой календарь':
         await my_calendar(update, context)
-    # ConversationHandler кнопки (обрабатываются ConversationHandler, если неактивен - игнорируем)
-    elif text in ['🎬 Создала видео', '📤 Загрузила видео', '🗑️ Удалить видео', 
-                   '📅 План на неделю', '💰 Выплатить аванс', '📅 Запросить выходной',
-                   '📅 Мои выходные', '📢 Срочное сообщение']:
-        # Эти кнопки должны обрабатываться ConversationHandler
-        # Если мы здесь - значит ConversationHandler не сработал (не должно быть)
-        pass
     elif text == '📊 Полная статистика':
         await full_statistics(update, context)
     elif text == '⚙️ Текущий баланс':
@@ -2016,4 +1994,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
