@@ -153,6 +153,7 @@ db = load_database()
 def is_admin(user_id: int) -> bool:
     """Проверка, является ли пользователь администратором"""
     return user_id in ADMINS or user_id == HUSBAND_ID
+    logger.info(f"🔑 Проверка админа: user_id={user_id}, ADMINS={ADMINS}, HUSBAND_ID={HUSBAND_ID}, is_admin={user_id in ADMINS or user_id == HUSBAND_ID}")
 
 def get_user_name(user_id: int) -> Optional[str]:
     """Получение имени пользователя по Telegram ID"""
@@ -234,6 +235,9 @@ def get_main_keyboard(user_id: int) -> ReplyKeyboardMarkup:
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработка команды /start"""
     user_id = update.effective_user.id
+    
+    # ЛОГИРОВАНИЕ ДЛЯ ОТЛАДКИ
+    logger.info(f"🔍 /start от пользователя: ID={user_id}, Username={update.effective_user.username}, Name={update.effective_user.first_name}")
     
     # Сброс состояния ConversationHandler (FIX для бага Ани)
     context.user_data.clear()
