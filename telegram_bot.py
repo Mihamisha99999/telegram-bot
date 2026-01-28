@@ -56,8 +56,8 @@ DAYOFF_DATE, DAYOFF_REASON, DAYOFF_APPROVE = 500, 501, 502
 ADMIN_DAYOFF_WHO, ADMIN_DAYOFF_DATES = 600, 601
 
 # Администраторы (Telegram ID)
-ADMINS = [6798829495]  # Твой Telegram ID
-HUSBAND_ID = 6798829495  # Telegram ID мужа (пока тот же)
+ADMINS = [6798829495]  # ЗАМЕНИ НА СВОЙ TELEGRAM ID
+HUSBAND_ID = 6798829495  # ЗАМЕНИ НА TELEGRAM ID МУЖА
 
 # ===========================
 # КОНФИГУРАЦИЯ ПОЛЬЗОВАТЕЛЕЙ
@@ -1794,7 +1794,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
     """Запуск бота"""
     # Получаем токен из переменной окружения
-    token = os.getenv('TELEGRAM_BOT_TOKEN')
+    token = os.getenv('TELEGRAM_BOT_TOKEN', '8280555186:AAFxZ9AfNOJdQWfFjFGk37g3pBnXCPvnupk')
     
     if not token:
         logger.error("TELEGRAM_BOT_TOKEN не установлен!")
