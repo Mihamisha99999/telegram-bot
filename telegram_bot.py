@@ -56,8 +56,8 @@ DAYOFF_DATE, DAYOFF_REASON, DAYOFF_APPROVE = 500, 501, 502
 ADMIN_DAYOFF_WHO, ADMIN_DAYOFF_DATES = 600, 601
 
 # Администраторы (Telegram ID)
-ADMINS = [6798829495]  # ЗАМЕНИ НА СВОЙ TELEGRAM ID
-HUSBAND_ID = 6798829495  # ЗАМЕНИ НА TELEGRAM ID МУЖА
+ADMINS = [2147091471]  # ЗАМЕНИ НА СВОЙ TELEGRAM ID
+HUSBAND_ID = 2106439695  # ЗАМЕНИ НА TELEGRAM ID МУЖА
 
 # ===========================
 # КОНФИГУРАЦИЯ ПОЛЬЗОВАТЕЛЕЙ
